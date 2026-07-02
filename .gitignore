@@ -17,3 +17,7 @@ benchmark_results/
 # Documentation outputs.
 **/_build/*
 **/generated/*
+
+
+# for viz
+**/asset_zoo/*
