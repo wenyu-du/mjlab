@@ -1,17 +1,20 @@
 import math
 from typing import Any
 
+import torch
 from mjlab.asset_zoo.robots.moz1_lh.moz1_lh_constants import get_moz1_lh_robot_cfg
 from mjlab.entity import EntityCfg
-from mjlab.envs import ManagerBasedRlEnvCfg
+from mjlab.envs import ManagerBasedRlEnvCfg, ManagerBasedRlEnv
 from mjlab.envs.mdp import (
   joint_pos_rel,
   joint_vel_rel,
   last_action,
   time_out,
   reset_joints_by_offset,
+  joint_acc_l2,
+  action_acc_l2,
 )
-from mjlab.envs.mdp.rewards import joint_vel_l2, action_rate_l2
+from mjlab.envs.mdp.rewards import joint_vel_l2, action_rate_l2, joint_pos_limits, joint_torques_l2
 from mjlab.envs.mdp.actions import RelativeJointPositionActionCfg
 from mjlab.managers import (
   ObservationGroupCfg,
@@ -30,7 +33,10 @@ from mjlab.tasks.manipulation.mdp.user_pose_command import UserPoseCommandCfg
 
 from . import mdp
 
-def moz1_lh_reach_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
+def action_l2(env: ManagerBasedRlEnv) -> torch.Tensor:
+  return torch.sum(torch.square(env.action_manager.action), dim=-1)
+
+def moz1_lh_reach_delta_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
   
   # Entity config
   robot_cfg = get_moz1_lh_robot_cfg()
@@ -50,15 +56,21 @@ def moz1_lh_reach_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
     "pose_cmd": UserPoseCommandCfg(
       asset_name="robot",
       body_name="ee_link",
+      mode="relative",
       debug_vis=True,
-      resampling_time_range=(5.0, 5.0),
+      resampling_time_range=(0.033, 0.033),
       ranges=UserPoseCommandCfg.Ranges(
-        pos_x=(0.2, 0.6),
-        pos_y=(-0.5, 0.5),
-        pos_z=(0.3, 0.8),
-        roll=(-1.57, 1.57),
-        pitch=(-1.57, 1.57),
-        yaw=(-1.57, 1.57),
+        pos_x=(-0.005, 0.005),
+        pos_y=(-0.005, 0.005),
+        pos_z=(-0.005, 0.005),
+        roll=(-0.035, 0.035),
+        pitch=(-0.035, 0.035),
+        yaw=(-0.035, 0.035),
+      ),
+      workspace=UserPoseCommandCfg.WorkspaceBounds(
+        pos_x=(0.2, 0.55),
+        pos_y=(-0.4, 0.4),
+        pos_z=(0.3, 0.7),
       )
     )
   }
@@ -97,7 +109,7 @@ def moz1_lh_reach_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
       func=reset_joints_by_offset,
       mode="reset",
       params={
-        "position_range": (-0.3, 0.3),
+        "position_range": (-0.8, 0.8),
         "velocity_range": (-0.1, 0.1),
         "asset_cfg": SceneEntityCfg("robot", joint_names=("j_lh_.*",)),
       }
@@ -106,28 +118,43 @@ def moz1_lh_reach_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
 
   # Rewards
   rewards = {
-    "track_position": RewardTermCfg(
+    "track_position_far": RewardTermCfg(
       func=mdp.motion_position_error_exp,
       weight=10.0,
-      params={"asset_cfg": SceneEntityCfg("robot", body_names=("ee_link",)), "command_name": "pose_cmd", "std": 0.15}
+      params={"asset_cfg": SceneEntityCfg("robot", body_names=("ee_link",)), "command_name": "pose_cmd", "std": 0.25}
     ),
-    "track_position_lin": RewardTermCfg(
-      func=mdp.motion_position_error_lin,
-      weight=-1.0,
-      params={"asset_cfg": SceneEntityCfg("robot", body_names=("ee_link",)), "command_name": "pose_cmd"}
+    "track_position_near": RewardTermCfg(
+      func=mdp.motion_position_error_exp,
+      weight=20.0,
+      params={"asset_cfg": SceneEntityCfg("robot", body_names=("ee_link",)), "command_name": "pose_cmd", "std": 0.02}
     ),
-    "track_orientation": RewardTermCfg(
+    "track_orientation_far": RewardTermCfg(
       func=mdp.motion_orientation_error_exp,
-      weight=6.0,
-      params={"asset_cfg": SceneEntityCfg("robot", body_names=("ee_link",)), "command_name": "pose_cmd", "std": 0.15}
+      weight=10.0,
+      params={"asset_cfg": SceneEntityCfg("robot", body_names=("ee_link",)), "command_name": "pose_cmd", "std": 0.25}
     ),
-    "track_orientation_lin": RewardTermCfg(
-      func=mdp.motion_orientation_error_lin,
-      weight=-1.0,
+    "track_orientation_near": RewardTermCfg(
+      func=mdp.motion_orientation_error_exp,
+      weight=15.0,
+      params={"asset_cfg": SceneEntityCfg("robot", body_names=("ee_link",)), "command_name": "pose_cmd", "std": 0.05}
+    ),
+    "track_position_distance": RewardTermCfg(
+      func=mdp.motion_position_distance,
+      weight=-100.0,
       params={"asset_cfg": SceneEntityCfg("robot", body_names=("ee_link",)), "command_name": "pose_cmd"}
     ),
-    "joint_vel_penalty": RewardTermCfg(func=joint_vel_l2, weight=-0.001),
-    "action_rate_penalty": RewardTermCfg(func=action_rate_l2, weight=-0.01),
+    "track_orientation_distance": RewardTermCfg(
+      func=mdp.motion_orientation_distance,
+      weight=-50.0,
+      params={"asset_cfg": SceneEntityCfg("robot", body_names=("ee_link",)), "command_name": "pose_cmd"}
+    ),
+    "joint_vel_penalty": RewardTermCfg(func=joint_vel_l2, weight=-0.05),
+    "joint_acc_penalty": RewardTermCfg(func=joint_acc_l2, weight=-1e-4),
+    "action_l2_penalty": RewardTermCfg(func=action_l2, weight=-0.02),
+    "action_rate_penalty": RewardTermCfg(func=action_rate_l2, weight=-0.02),
+    "action_acc_penalty": RewardTermCfg(func=action_acc_l2, weight=-0.005),
+    "joint_pos_limits_penalty": RewardTermCfg(func=joint_pos_limits, weight=-10.0),
+    "joint_torques_penalty": RewardTermCfg(func=joint_torques_l2, weight=-1e-4),
   }
 
   terminations = {

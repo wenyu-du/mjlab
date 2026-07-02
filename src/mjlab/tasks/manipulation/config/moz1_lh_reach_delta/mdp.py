@@ -71,3 +71,21 @@ def motion_orientation_error_lin(env: ManagerBasedRlEnv, command_name: str, asse
     error = torch.sum(torch.square(quat_box_minus(orientation_cmd, orientation)), dim=-1)
     return error
 
+def motion_position_distance(env: ManagerBasedRlEnv, command_name: str, asset_cfg: SceneEntityCfg) -> torch.Tensor:
+    asset: Entity = env.scene[asset_cfg.name]
+    position_cmd = env.command_manager.get_command(command_name)[:, :3]
+    if asset_cfg.site_ids:
+        position = asset.data.site_pos_w[:, asset_cfg.site_ids, :].squeeze(1)
+    else:
+        position = asset.data.body_link_pos_w[:, asset_cfg.body_ids, :].squeeze(1)
+    return torch.linalg.norm(position_cmd - position, dim=-1)
+
+def motion_orientation_distance(env: ManagerBasedRlEnv, command_name: str, asset_cfg: SceneEntityCfg) -> torch.Tensor:
+    asset: Entity = env.scene[asset_cfg.name]
+    orientation_cmd = env.command_manager.get_command(command_name)[:, 3:]
+    if asset_cfg.site_ids:
+        orientation = asset.data.site_quat_w[:, asset_cfg.site_ids, :].squeeze(1)
+    else:
+        orientation = asset.data.body_link_quat_w[:, asset_cfg.body_ids, :].squeeze(1)
+    rot_vec = quat_box_minus(orientation_cmd, orientation)
+    return torch.linalg.norm(rot_vec, dim=-1)

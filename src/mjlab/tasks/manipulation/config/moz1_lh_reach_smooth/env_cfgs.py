@@ -10,6 +10,8 @@ from mjlab.envs.mdp import (
   last_action,
   time_out,
   reset_joints_by_offset,
+  joint_acc_l2,
+  action_acc_l2,
 )
 from mjlab.envs.mdp.rewards import joint_vel_l2, action_rate_l2
 from mjlab.envs.mdp.actions import RelativeJointPositionActionCfg
@@ -126,8 +128,10 @@ def moz1_lh_reach_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
       weight=-1.0,
       params={"asset_cfg": SceneEntityCfg("robot", body_names=("ee_link",)), "command_name": "pose_cmd"}
     ),
-    "joint_vel_penalty": RewardTermCfg(func=joint_vel_l2, weight=-0.001),
-    "action_rate_penalty": RewardTermCfg(func=action_rate_l2, weight=-0.01),
+    "joint_vel_penalty": RewardTermCfg(func=joint_vel_l2, weight=-0.005),
+    "joint_acc_penalty": RewardTermCfg(func=joint_acc_l2, weight=-2.5e-7),
+    "action_rate_penalty": RewardTermCfg(func=action_rate_l2, weight=-0.05),
+    "action_acc_penalty": RewardTermCfg(func=action_acc_l2, weight=-0.01),
   }
 
   terminations = {

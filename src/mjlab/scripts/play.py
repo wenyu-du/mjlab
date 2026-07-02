@@ -49,6 +49,8 @@ class PlayConfig:
   viewer: Literal["auto", "native", "viser"] = "auto"
   no_terminations: bool = False
   """Disable all termination conditions (useful for viewing motions with dummy agents)."""
+  interactive_commands: bool = False
+  """Disable command resampling to allow interactive dragging of targets."""
   log_root: str = "logs/rsl_rl"
   """Root directory under which experiment logs are written."""
 
@@ -71,6 +73,13 @@ def run_play(task_id: str, cfg: PlayConfig):
   if cfg.no_terminations:
     env_cfg.terminations = {}
     print("[INFO]: Terminations disabled")
+
+  # Disable command resampling for interactive mode.
+  if cfg.interactive_commands:
+    for cmd_cfg in env_cfg.commands.values():
+      if hasattr(cmd_cfg, "resampling_time_range"):
+        cmd_cfg.resampling_time_range = (1e9, 1e9)
+    print("[INFO]: Command resampling disabled for interactive dragging")
 
   # Check if this is a tracking task by checking for motion command.
   is_tracking_task = "motion" in env_cfg.commands and isinstance(
@@ -206,6 +215,68 @@ def run_play(task_id: str, cfg: PlayConfig):
       str(resume_path), load_cfg={"actor": True}, strict=True, map_location=device
     )
     policy = runner.get_inference_policy(device=device)
+
+  if cfg.interactive_commands and not DUMMY_MODE:
+    class EvalPolicyWrapper:
+      def __init__(self, base_policy, rl_env):
+        self.policy = base_policy
+        self.env = rl_env
+        self.last_target_pos = None
+        self.moving = False
+        self.stationary_steps = 0
+        self.settling_time_recorded = False
+        self.precision_buffer = []
+        self.dt = rl_env.unwrapped.step_dt
+
+      def __call__(self, obs):
+        action = self.policy(obs)
+        try:
+          self._evaluate()
+        except Exception:
+          pass
+        return action
+
+      def _evaluate(self):
+        import numpy as np
+        cmd = self.env.unwrapped.command_manager.get_term("pose_cmd")
+        target_pos = cmd.target_pos[0].cpu().numpy()
+        ee_pos = cmd.robot.data.body_link_pos_w[0, cmd.ee_body_id].cpu().numpy()
+        
+        error = np.linalg.norm(target_pos - ee_pos)
+        
+        if self.last_target_pos is None:
+          self.last_target_pos = target_pos
+          return
+          
+        target_vel = np.linalg.norm(target_pos - self.last_target_pos) / self.dt
+        self.last_target_pos = target_pos
+        
+        if target_vel > 0.02: # Target is being dragged
+          self.moving = True
+          self.stationary_steps = 0
+          self.settling_time_recorded = False
+          self.precision_buffer = []
+        else:
+          if self.moving:
+            self.moving = False # Target just stopped
+            
+          self.stationary_steps += 1
+          
+          if not self.settling_time_recorded:
+            if error < 0.02: # 2cm threshold for settling
+              settling_time = self.stationary_steps * self.dt
+              print(f"[Eval] Response Settling Time (<2cm): {settling_time:.2f}s")
+              self.settling_time_recorded = True
+              
+          if self.stationary_steps * self.dt > 1.0: # Stationary for > 1s
+            self.precision_buffer.append(error)
+            buffer_size = int(0.5 / self.dt)
+            if len(self.precision_buffer) >= buffer_size:
+              mean_err = np.mean(self.precision_buffer)
+              print(f"[Eval] Steady-State Precision: {mean_err*1000:.1f} mm")
+              self.precision_buffer = []
+
+    policy = EvalPolicyWrapper(policy, env)
 
   # Build checkpoint manager for hot-swapping checkpoints in the viewer.
   ckpt_manager: CheckpointManager | None = None

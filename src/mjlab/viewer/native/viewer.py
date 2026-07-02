@@ -217,6 +217,15 @@ class NativeMujocoViewer(BaseViewer):
     with self._mj_lock:
       sim = self.env.unwrapped.sim
       sim_data = sim.data
+
+      # Sync manual mocap drag from viewer back to GPU sim_data.
+      if v.perturb.active != 0 and v.perturb.select > 0:
+        body_id = v.perturb.select
+        mocap_id = self.mjm.body_mocapid[body_id]
+        if mocap_id >= 0:
+          sim_data.mocap_pos[self.env_idx, mocap_id] = torch.from_numpy(self.mjd.mocap_pos[mocap_id]).to(device=sim_data.mocap_pos.device, dtype=sim_data.mocap_pos.dtype)
+          sim_data.mocap_quat[self.env_idx, mocap_id] = torch.from_numpy(self.mjd.mocap_quat[mocap_id]).to(device=sim_data.mocap_quat.device, dtype=sim_data.mocap_quat.dtype)
+
       self._sync_env_state_to_mjdata(self.mjd, sim_data, self.env_idx)
       self._sync_model_fields(sim, self.env_idx)
       mujoco.mj_forward(self.mjm, self.mjd)
