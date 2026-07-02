@@ -13,6 +13,58 @@ mjlab combines [Isaac Lab](https://github.com/isaac-sim/IsaacLab)'s manager-base
 The framework provides composable building blocks for environment design,
 with minimal dependencies and direct access to native MuJoCo data structures.
 
+
+
+## Moz training
+
+当前创建的环境配置在mjlab/src/mjlab/tasks/manipulation/config 目录下，配置有
+1. Mjlab-Moz1-Lh-Reach           |  给定目标位姿的到达任务
+2. Mjlab-Moz1-Lh-Reach-Smooth    |  配置1加入了关节平滑的奖励奖励，解决到位后的抖动问题
+3. Mjlab-Moz1-Lh-Reach-Delta     |  持续输出微小增量的训练
+
+
+**训练脚本举例**
+```bash
+uv run python -m mjlab.scripts.train Mjlab-Moz1-Lh-Reach --enable-nan-guard True
+```
+如果接着停止的训练继续，添加参数 --agent.resume True
+
+
+**推理脚本举例**
+
+```bash
+# 1. 运行 Reach Smooth 模型：
+uv run play Mjlab-Moz1-Lh-Reach-Smooth --interactive-commands True --checkpoint-file pretrained_models/moz1_lh_reach_smooth_best.pt
+
+# 2. 运行 Reach Delta 模型：
+uv run play Mjlab-Moz1-Lh-Reach-Delta --interactive-commands True --checkpoint-file pretrained_models/moz1_lh_reach_delta_best.pt
+
+# 3. 运行基础 Reach 模型：
+uv run play Mjlab-Moz1-Lh-Reach --interactive-commands True --checkpoint-file pretrained_models/moz1_lh_reach_best.pt
+
+# --interactive-commands： 是否开启目标位姿拖拽
+```
+
+### 交互式拖拽与实时评估说明
+
+在使用 `--interactive-commands True` 启动推理脚本后，可以直接在仿真界面中进行操作和精度评估：
+
+**1. 拖拽目标的操作方法：**
+- 在 MuJoCo 仿真窗口中，按住键盘的 **`Ctrl` 键**（Mac 为 `Cmd` 键）。
+- 鼠标悬停在绿色的目标球（Target）上，**双击鼠标左键**，选中该目标。选中后会显示出控制坐标轴。
+- **平移目标**：按住 `Ctrl` 键，按住鼠标 **右键** 并拖动，即可平移目标球。
+- **旋转目标**：按住 `Ctrl` 键，按住鼠标 **左键** 并拖动，即可在原地旋转目标球的姿态。
+- 机械臂会实时、平滑地跟随拖拽的目标位姿。
+
+**2. 精度和响应速度评估说明：**
+当你拖拽目标时，脚本会在后台自动监听的操作，并在启动程序的终端 (Terminal) 中实时打印两项核心评估数据：
+- **响应速度 (Response Settling Time)**：当拖拽目标并**松手**的那一刻，系统会启动内置秒表。当机械臂末端与目标球的绝对直线距离首次进入 **2cm** 阈值内时(可自定义)，秒表停止并在终端打印耗时（例如：`[Eval] Response Settling Time (<2cm): 0.35s`）。这反映了机械臂应对突发指令的动态敏捷性。
+- **稳态精度 (Steady-State Precision)**：当目标球保持静止超过 **1秒钟** 后，系统认为机械臂已进入稳态。随后系统每隔 0.5 秒会计算一次当前的绝对欧氏距离误差，并打印在终端（例如：`[Eval] Steady-State Precision: 0.8 mm`）。注意，该精度计算的是严苛的三维空间绝对直线距离（L2 Norm），这意味着实际的 X、Y、Z 单轴误差只会更小。
+
+
+
+---
+
 ## Getting Started
 
 mjlab requires an NVIDIA GPU for training. macOS is supported for evaluation only.
