@@ -1,0 +1,33 @@
+<mujoco>
+  <asset>
+    <mesh name="base_link" content_type="model/stl" file="base_link.STL" />
+    <mesh name="Leg-6" content_type="model/stl" file="Leg-6.STL" />
+    <mesh name="Leg-5" content_type="model/stl" file="Leg-5.STL" />
+    <mesh name="Leg-4" content_type="model/stl" file="Leg-4.STL" />
+    <mesh name="Leg-3" content_type="model/stl" file="Leg-3.STL" />
+    <mesh name="Leg-2" content_type="model/stl" file="Leg-2.STL" />
+    <mesh name="Leg-1" content_type="model/stl" file="Leg-1.STL" />
+    <mesh name="L1" content_type="model/stl" file="L1.STL" />
+    <mesh name="L2" content_type="model/stl" file="L2.STL" />
+    <mesh name="L3" content_type="model/stl" file="L3.STL" />
+    <mesh name="L4" content_type="model/stl" file="L4.STL" />
+    <mesh name="L5" content_type="model/stl" file="L5.STL" />
+    <mesh name="L6" content_type="model/stl" file="L6.STL" />
+    <mesh name="L7" content_type="model/stl" file="L7.STL" />
+    <mesh name="R1" content_type="model/stl" file="R1.STL" />
+    <mesh name="R2" content_type="model/stl" file="R2.STL" />
+    <mesh name="R3" content_type="model/stl" file="R3.STL" />
+    <mesh name="R4" content_type="model/stl" file="R4.STL" />
+    <mesh name="R5" content_type="model/stl" file="R5.STL" />
+    <mesh name="R6" content_type="model/stl" file="R6.STL" />
+    <mesh name="R7" content_type="model/stl" file="R7.STL" />
+    <mesh name="H1" content_type="model/stl" file="H1.STL" />
+    <mesh name="H2" content_type="model/stl" file="H2.STL" />
+    <mesh name="H3" content_type="model/stl" file="H3.STL" />
+    <mesh name="C2" content_type="model/stl" file="C2.STL" />
+    <mesh name="C3" content_type="model/stl" file="C3.STL" />
+    <mesh name="C4" content_type="model/stl" file="C4.STL" />
+    <mesh name="C1" content_type="model/stl" file="C1.STL" />
+    <mesh name="IMU" content_type="model/stl" file="IMU.STL" />
+  </asset>
+</mujoco>

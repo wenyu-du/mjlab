@@ -1,0 +1,90 @@
+<mujoco model="moz1_left_hand">
+    <compiler angle="radian" autolimits="true" eulerseq="xyz" meshdir="meshes"/>
+    <option timestep="0.002" iterations="100" integrator="implicitfast" density="0" viscosity="0" />
+
+    <visual>
+        <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0"/>
+        <rgba haze="0.15 0.25 0.35 1"/>
+        <global azimuth="150" elevation="-20"/>
+    </visual>
+
+    <asset>
+        <texture name="plane" type="2d" builtin="checker" rgb1=".1 .1 .1" rgb2=".9 .9 .9" width="512" height="512" />
+        <material name="plane" texture="plane" reflectance="0.3" texrepeat="1 1" texuniform="true" />
+        <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512" height="3072"/>
+
+        <mesh name="L1" content_type="model/stl" file="L1.STL" />
+        <mesh name="L2" content_type="model/stl" file="L2.STL" />
+        <mesh name="L3" content_type="model/stl" file="L3.STL" />
+        <mesh name="L4" content_type="model/stl" file="L4.STL" />
+        <mesh name="L5" content_type="model/stl" file="L5.STL" />
+        <mesh name="L6" content_type="model/stl" file="L6.STL" />
+        <mesh name="L7" content_type="model/stl" file="L7.STL" />
+    </asset>
+
+    <worldbody>
+        <geom name="floor" pos="0 0 0" size="10 10 0.1" type="plane" material="plane" condim="3" contype="1" conaffinity="65535" />
+        <light directional="true" ambient=".3 .3 .3" pos="30 30 30" dir="0 -2 -1" diffuse=".5 .5 .5" specular=".5 .5 .5" />
+        <body name="target" mocap="true" pos="0.289 0.0 0.1995" >
+            <geom type="sphere" size="0.05" rgba="1 0 0 1" contype="0" conaffinity="0" />
+        </body>
+
+        <body name="base" pos="0 0.0 0.5">
+            <geom type="box" size="0.2 0.06 0.5" rgba="0.5 0.5 0.5 0.6" mass="10" condim="3" contype="1" conaffinity="65535" />
+            <body name="l_lh_1" pos="0.22 0 0.4">
+                <inertial pos="0.0547495 0.00276998 0.00022292" quat="0.513235 0.51481 0.485909 0.485235" mass="2.26362" diaginertia="0.00609871 0.00593897 0.00291596" />
+                <joint name="j_lh_1" pos="0 0 0" axis="1 0 0" damping="0.05" range="-3.1 3.1" actuatorfrcrange="-200 200" />
+                <geom type="mesh" rgba="0.5 0.5 0.529412 1" mesh="L1" contype="0" conaffinity="0" density="0" group="1" />
+                <geom type="cylinder" size="0.06 0.06" pos="0.06 0 0" euler="0 1.578 0" rgba="0.6 0.6 0.2 1" contype="1" conaffinity="1" density="0" group="3" />
+                <body name="l_lh_2" pos="0.079 0 0">
+                    <inertial pos="-0.0007589 -0.00895001 -0.0590928" quat="0.995435 -0.0936704 -0.0118428 -0.0139783" mass="1.70151" diaginertia="0.00997199 0.00848993 0.00349083" />
+                    <joint name="j_lh_2" pos="0 0 0" axis="0 1 0" damping="0.05" range="-2.97 0.1" actuatorfrcrange="-200 200" />
+                    <geom type="mesh" rgba="0.6902 0.61176 0.52941 1" mesh="L2" contype="0" conaffinity="0" density="0" group="1" />
+                    <body name="l_lh_3" pos="0 0 -0.113">
+                        <inertial pos="0.00354184 0.00051786 -0.122916" quat="0.682881 0.0238508 0.0228831 0.729781" mass="2.16229" diaginertia="0.0125343 0.0123931 0.00259313" />
+                        <joint name="j_lh_3" pos="0 0 0" axis="0 0 1" damping="0.05" range="-3.0 3.0" actuatorfrcrange="-90 90" />
+                        <geom type="mesh" rgba="0.5 0.5 0.52941 1" mesh="L3" contype="0" conaffinity="0" density="0" group="1" />
+                        <geom type="cylinder" size="0.06 0.07" pos="0 0 -0.04" euler="0 0 0" rgba="0.6 0.6 0.2 1" contype="1" conaffinity="1" density="0" group="3" />
+                        <body name="l_lh_4" pos="0 0 -0.187">
+                            <inertial pos="-0.0173898 7.621e-05 -0.0568789" quat="0.992135 -0.000332296 0.125109 -0.00396338" mass="1.06371" diaginertia="0.00459925 0.00451648 0.000796607" />
+                            <joint name="j_lh_4" pos="0 0 0" axis="1 0 0" damping="0.05" range="-2.25 2.6" actuatorfrcrange="-90 90" />
+                            <geom type="mesh" rgba="0.6902 0.61176 0.52941 1" mesh="L4" contype="0" conaffinity="0" density="0" group="1" />
+                            <geom type="cylinder" size="0.048 0.056" pos="-0.0 0 0" euler="0 1.578 0" rgba="0.6 0.6 0.2 1" contype="1" conaffinity="1" density="0" group="3" />
+                            <body name="l_lh_5" pos="0 0 -0.101">
+                                <inertial pos="0.00156708 -0.00511158 -0.0988337" quat="0.822469 0.0226677 -0.0436238 0.566681" mass="1.62899" diaginertia="0.00748142 0.00738898 0.00174301" />
+                                <joint name="j_lh_5" pos="0 0 0" axis="0 0 1" damping="0.05" range="-3.05 3.05" actuatorfrcrange="-60 60" />
+                                <geom type="mesh" rgba="0.5 0.5 0.52941 1" mesh="L5" contype="0" conaffinity="0" density="0" group="1" />
+                                <geom type="cylinder" size="0.048 0.07" pos="0 0 -0.03" euler="0 0 0" rgba="0.6 0.6 0.6 1" contype="1" conaffinity="1" density="0" group="3" />
+                                <body name="l_lh_6" pos="0 0 -0.159">
+                                    <inertial pos="0.0116648 0.0105348 -0.0501291" quat="0.427373 0.142559 -0.0530785 0.891186" mass="0.92138" diaginertia="0.00292962 0.00248792 0.000689094" />
+                                    <joint name="j_lh_6" pos="0 0 0" axis="0 1 0" damping="0.05" range="-1.66 1.66" actuatorfrcrange="-60 60" />
+                                    <geom type="mesh" rgba="0.690196 0.611765 0.529412 1" mesh="L6" contype="0" conaffinity="0" density="0" group="1" />
+                                    <geom type="cylinder" size="0.046 0.05" pos="0 0 0.0" euler="1.578 0 0" rgba="0.6 0.6 0.6 1" contype="1" conaffinity="1" density="0" group="3" />
+                                    <body name="l_lh_7" pos="0 0 -0.0905">
+                                        <inertial pos="-0.0050797 -3.643e-05 -0.00136032" quat="0.999385 0.000256411 -0.0318119 0.0147291" mass="0.688226" diaginertia="0.00073418 0.000715242 0.000680363" />
+                                        <joint name="j_lh_7" pos="0 0 0" axis="1 0 0" damping="0.05" range="-1.57 1.57" actuatorfrcrange="-60 60" />
+                                        <geom type="mesh" rgba="0.6902 0.61176 0.52941 1" mesh="L7" contype="0" conaffinity="0" density="0" group="1" />
+                                        <geom type="cylinder" size="0.044 0.05" pos="0 0 0.0" euler="0 1.578 0" rgba="0.6 0.6 0.6 1" contype="1" conaffinity="1" density="0" group="3" />
+                                        <body name="ee_link" pos="-0.01 0 -0.05">
+                                            <site name="ee_link_site" size="0.01 0.01 0.01" rgba="0 1 0 1" group="1" />
+                                        </body>
+                                    </body>  <!-- L7 -->
+                                </body>  <!-- L6 -->
+                            </body>  <!-- L5 -->
+                        </body>  <!-- L4 -->
+                    </body>  <!-- L3 -->
+                </body>  <!-- L2 -->
+            </body>  <!-- L1 -->
+        </body>
+    </worldbody>
+
+    <actuator>
+        <position name="lh_1" joint="j_lh_1" kp="2500" kv="100" ctrlrange="-3.1 3.1" />
+        <position name="lh_2" joint="j_lh_2" kp="2500" kv="100" ctrlrange="-2.97 0.1" />
+        <position name="lh_3" joint="j_lh_3" kp="2500" kv="100" ctrlrange="-3.0 3.0" />
+        <position name="lh_4" joint="j_lh_4" kp="2500" kv="100" ctrlrange="-2.25 2.6" />
+        <position name="lh_5" joint="j_lh_5" kp="2500" kv="100" ctrlrange="-3.05 3.05" />
+        <position name="lh_6" joint="j_lh_6" kp="2500" kv="100" ctrlrange="-1.66 1.66" />
+        <position name="lh_7" joint="j_lh_7" kp="2500" kv="100" ctrlrange="-1.57 1.57" />
+    </actuator>
+</mujoco>

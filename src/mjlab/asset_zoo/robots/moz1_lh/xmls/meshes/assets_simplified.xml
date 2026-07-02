@@ -1,0 +1,33 @@
+<mujoco>
+  <asset>
+    <mesh name="base_link" content_type="model/stl" file="simplified_collision/base_link_simplified.STL" />
+    <mesh name="Leg-6" content_type="model/stl" file="simplified_collision/Leg-6_simplified.STL" />
+    <mesh name="Leg-5" content_type="model/stl" file="simplified_collision/Leg-5_simplified.STL" />
+    <mesh name="Leg-4" content_type="model/stl" file="simplified_collision/Leg-4_simplified.STL" />
+    <mesh name="Leg-3" content_type="model/stl" file="simplified_collision/Leg-3_simplified.STL" />
+    <mesh name="Leg-2" content_type="model/stl" file="simplified_collision/Leg-2_simplified.STL" />
+    <mesh name="Leg-1" content_type="model/stl" file="simplified_collision/Leg-1_simplified.STL" />
+    <mesh name="L1" content_type="model/stl" file="simplified_collision/L1_simplified.STL" />
+    <mesh name="L2" content_type="model/stl" file="simplified_collision/L2_simplified.STL" />
+    <mesh name="L3" content_type="model/stl" file="simplified_collision/L3_simplified.STL" />
+    <mesh name="L4" content_type="model/stl" file="simplified_collision/L4_simplified.STL" />
+    <mesh name="L5" content_type="model/stl" file="simplified_collision/L5_simplified.STL" />
+    <mesh name="L6" content_type="model/stl" file="simplified_collision/L6_simplified.STL" />
+    <mesh name="L7" content_type="model/stl" file="simplified_collision/L7_simplified.STL" />
+    <mesh name="R1" content_type="model/stl" file="simplified_collision/R1_simplified.STL" />
+    <mesh name="R2" content_type="model/stl" file="simplified_collision/R2_simplified.STL" />
+    <mesh name="R3" content_type="model/stl" file="simplified_collision/R3_simplified.STL" />
+    <mesh name="R4" content_type="model/stl" file="simplified_collision/R4_simplified.STL" />
+    <mesh name="R5" content_type="model/stl" file="simplified_collision/R5_simplified.STL" />
+    <mesh name="R6" content_type="model/stl" file="simplified_collision/R6_simplified.STL" />
+    <mesh name="R7" content_type="model/stl" file="simplified_collision/R7_simplified.STL" />
+    <mesh name="H1" content_type="model/stl" file="simplified_collision/H1_simplified.STL" />
+    <mesh name="H2" content_type="model/stl" file="simplified_collision/H2_simplified.STL" />
+    <mesh name="H3" content_type="model/stl" file="simplified_collision/H3_simplified.STL" />
+    <mesh name="C2" content_type="model/stl" file="C2.STL" />
+    <mesh name="C3" content_type="model/stl" file="C3.STL" />
+    <mesh name="C4" content_type="model/stl" file="C4.STL" />
+    <mesh name="C1" content_type="model/stl" file="C1.STL" />
+    <mesh name="IMU" content_type="model/stl" file="IMU.STL" />
+  </asset>
+</mujoco>

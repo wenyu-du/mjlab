@@ -18,6 +18,3 @@ benchmark_results/
 **/_build/*
 **/generated/*
 
-
-# for viz
-**/asset_zoo/*
